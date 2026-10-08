@@ -50,9 +50,16 @@ Status: proposed unless marked accepted. This file is the source of truth for ch
 
 **Why:** provider changes, retries, idempotency, and testability are operational concerns, not UI concerns.
 
+## ADR-009: single-salon first
+
+**Decision:** build and validate the operational product for one salon first, while retaining `salon_id` and membership boundaries in the schema so a future multi-salon product does not require a rewrite.
+
+**Why:** it reduces product and operational complexity during the highest-risk phase. Tenancy-ready data boundaries preserve the expansion path without forcing SaaS billing, onboarding, cross-salon administration, and support concerns into the launch-critical path.
+
+**Accepted:** 2026-10-08 by Mehrdad Rastadfar.
+
 ## Open decisions requiring owner input
 
 1. Deployment/database choice: Vercel + Neon/Postgres, or a different controlled host.
 2. SMS provider: Kavenegar, Ghasedak, or another provider with delivery-status support.
 3. Payment timing: pay-at-salon first, deposit in MVP, or deposit immediately after booking correctness.
-4. Product shape: single-salon operational tool first, or multi-salon SaaS tenancy from day one.
