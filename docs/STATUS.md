@@ -14,11 +14,13 @@ Updated 2026-10-08.
 - Authenticated service-aware five-minute hold endpoint with artist eligibility and any-artist resolution.
 - Booking finalize endpoint uses a transaction and database overlap constraint.
 - Tehran/Jalali conversion helpers and boundary tests.
+- Public catalog endpoint and customer UI wiring for live catalog, availability, hold, conflict, auth-required, API failure, and retry messaging.
 - Pure booking policy primitives and regression tests for duration, finish policy, intervals, and CSV formula safety.
 
 ## Next
 
 1. Add integration tests against PostgreSQL for holds, expiry, authorization, and concurrent finalize.
-2. Connect the visual flow to API states: conflict, hold expiry, offline, retry, and confirmed receipt.
-3. Add notifications, cancellation/reschedule, owner timeline, and deployment smoke checks.
-4. Replace fixed scheduling defaults with salon-configured resolution, buffer, breaks, days off, lead time, and overflow settings.
+2. Add the OTP entry UI and call finalize after hold confirmation.
+3. Replace the temporary demo fallback slots with an explicit unavailable state when `NEXT_PUBLIC_SALON_ID` is missing.
+4. Add notifications, cancellation/reschedule, owner timeline, and deployment smoke checks.
+5. Replace fixed scheduling defaults with salon-configured resolution, buffer, breaks, days off, lead time, and overflow settings.
