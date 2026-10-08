@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "smoke": "node scripts/smoke-check.mjs",
+    "check": "npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {
     "@vercel/postgres": "^0.10.0",
