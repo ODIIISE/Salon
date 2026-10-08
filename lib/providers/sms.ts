@@ -3,23 +3,30 @@ export interface SmsProvider {
   sendTransactional(input: { phoneE164: string; message: string }): Promise<void>;
 }
 
+function localPhone(phoneE164: string) {
+  return phoneE164.replace(/^\+98/, "0");
+}
+
 export class MockSmsProvider implements SmsProvider {
   async sendOtp() { return; }
   async sendTransactional() { return; }
 }
 
-export class KavenegarSmsProvider implements SmsProvider {
-  constructor(private readonly apiKey: string, private readonly sender?: string) {}
-  private async send(phoneE164: string, message: string) {
-    const response = await fetch(`https://api.kavenegar.com/v1/${this.apiKey}/sms/send.json`, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ receptor: phoneE164, message, sender: this.sender ?? "" }), cache: "no-store" });
+export class FarazSmsProvider implements SmsProvider {
+  constructor(private readonly apiKey: string, private readonly lineNumber: string, private readonly patternCode: string) {}
+  private async sendPattern(phoneE164: string, code: string) {
+    const response = await fetch("https://api.iranpayamak.com/ws/v1/sms/pattern", { method: "POST", headers: { "Api-Key": this.apiKey, "Content-Type": "application/json" }, body: JSON.stringify({ code: this.patternCode, recipient: localPhone(phoneE164), attributes: { code }, line_number: this.lineNumber, number_format: "english" }), cache: "no-store" });
     if (!response.ok) throw new Error("SMS_PROVIDER_FAILED");
   }
-  async sendOtp({ phoneE164, code }: { phoneE164: string; code: string }) { await this.send(phoneE164, `کد ورود فورهند: ${code}`); }
-  async sendTransactional({ phoneE164, message }: { phoneE164: string; message: string }) { await this.send(phoneE164, message); }
+  private async sendSimple(phoneE164: string, message: string) {
+    const response = await fetch("https://api.iranpayamak.com/ws/v1/sms/simple", { method: "POST", headers: { "Api-Key": this.apiKey, "Content-Type": "application/json" }, body: JSON.stringify({ text: message, recipients: [localPhone(phoneE164)], line_number: this.lineNumber, number_format: "english" }), cache: "no-store" });
+    if (!response.ok) throw new Error("SMS_PROVIDER_FAILED");
+  }
+  async sendOtp(input: { phoneE164: string; code: string }) { await this.sendPattern(input.phoneE164, input.code); }
+  async sendTransactional(input: { phoneE164: string; message: string }) { await this.sendSimple(input.phoneE164, input.message); }
 }
 
 export function smsProvider(): SmsProvider {
-  const provider = process.env.SMS_PROVIDER ?? "mock";
-  if (provider === "kavenegar" && process.env.SMS_API_KEY) return new KavenegarSmsProvider(process.env.SMS_API_KEY, process.env.SMS_SENDER);
+  if (process.env.SMS_PROVIDER === "farazsms" && process.env.SMS_API_KEY && process.env.SMS_LINE_NUMBER && process.env.SMS_PATTERN_CODE) return new FarazSmsProvider(process.env.SMS_API_KEY, process.env.SMS_LINE_NUMBER, process.env.SMS_PATTERN_CODE);
   return new MockSmsProvider();
 }
