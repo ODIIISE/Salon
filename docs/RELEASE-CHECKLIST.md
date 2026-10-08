@@ -3,14 +3,14 @@
 ## Vercel
 
 - [ ] Preview and Production use separate Postgres databases.
-- [ ] `POSTGRES_URL`, session secrets, `CRON_SECRET`, `NEXT_PUBLIC_SALON_ID`, SMS provider and API key are configured in the correct environments.
+- [ ] `POSTGRES_URL`, session secrets, `CRON_SECRET`, `NEXT_PUBLIC_SALON_ID`, `SMS_PROVIDER=farazsms`, `SMS_API_KEY`, `SMS_LINE_NUMBER`, and `SMS_PATTERN_CODE` are configured in the correct environments.
 - [ ] Bootstrap secret is rotated or removed after owner setup.
 - [ ] `/api/health` returns database ready after migrations.
 - [ ] Vercel cron invocation is authorized and notification jobs are observable.
 
 ## Booking
 
-- [ ] Customer OTP request/verify works with a real Iranian number.
+- [ ] Customer OTP request/verify works with a real Iranian number through FarazSMS.
 - [ ] Availability reflects Tehran date, Jalali display, hours, days off, blocks, buffer, lead time, and finish policy.
 - [ ] Two simultaneous finalizations produce exactly one booking and one conflict.
 - [ ] Hold expiry returns a clear recoverable state.
