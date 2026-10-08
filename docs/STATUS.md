@@ -11,7 +11,7 @@ Updated 2026-10-08.
 - Pooled database boundary, no-store private response headers, readiness endpoint, Vercel cron configuration, protected notification worker route, and recovery error screen.
 - PostgreSQL schema with memberships, artists, services, add-ons, schedule, blocks, holds, bookings, events, audit logs, overlap exclusion, OTP/session, rate-limit, schedule settings, days off, notification jobs, and booking idempotency.
 - Auth schema, migration runner, hashed OTP/session primitives, provider adapter, OTP request/verify with phone/IP rate limits, session lookup, current-user, logout, and staff authorization.
-- Server-side service-aware availability engine with owner-configured resolution, buffer, lead time, strict latest-finish/capped overflow, Tehran weekday/date filtering, days off, active booking exclusion, artist blocks, and regression tests.
+- Server-side service-aware availability engine with owner-configured resolution, buffer, lead time, strict latest-finish/capped overflow, Tehran weekday/date filtering, days off, active booking exclusion, artist blocks, and corrected Tehran-local interval overlap comparison.
 - Authenticated service-aware five-minute hold endpoint with artist eligibility and any-artist resolution.
 - Booking finalize endpoint uses a transaction, database overlap constraint, idempotency key, booking event, and queued confirmation notification.
 - Tehran/Jalali conversion helpers and boundary tests.
@@ -19,7 +19,7 @@ Updated 2026-10-08.
 - Customer booking history, cancellation, and rescheduling endpoint.
 - Owner day timeline, protected status transitions, manual booking with explicit conflict override/audit, block controls, schedule settings, days off, and formula-safe authorized CSV export.
 - Kavenegar SMS adapter boundary plus retry-safe notification processing.
-- PostgreSQL integration test contract scaffold.
+- PostgreSQL integration test contract scaffold, including a Tehran-local overlap regression.
 - Pure booking policy primitives and regression tests for duration, finish policy, intervals, and CSV formula safety.
 
 ## Next
