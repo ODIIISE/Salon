@@ -9,21 +9,26 @@ Updated 2026-10-08.
 - Seven migrations exist in exact lexical order: `001_initial.sql` through `007_payments.sql`.
 - OTP/session auth, role authorization, service-aware Tehran/Jalali availability, five-minute holds, transactional booking finalization, PostgreSQL overlap protection, notification queueing, FarazSMS adapters, owner timeline operations, manual conflict overrides, payment policy, and formula-safe exports are present in code.
 - `vercel.json` already contains both cron schedules: notification processing and expired-hold cleanup, each route protected by `CRON_SECRET`.
-- The integration test scaffold exists and is skipped without `POSTGRES_URL`; it still needs real concurrent booking, expiry, idempotency, and Tehran-overlap assertions.
 
-## Slice 1 completed
+## Slices completed
 
 - Replaced the stale README with local setup, scripts, environment, architecture, migration, CI, deployment, and documentation links.
 - Standardized the documented FarazSMS variables to the names already used by runtime code: `SMS_API_KEY`, `SMS_LINE_NUMBER`, and `SMS_PATTERN_CODE`.
 - Added an explicit accepted FarazSMS decision and removed stale provider-choice ambiguity from the decision record.
 - Added `npm run verify-migrations` and included it in `npm run check`.
 - Hardened runtime validation for production database, session, cron, salon, SMS, and payment configuration.
+- Fixed the hold race: hold creation now serializes availability decisions per salon/artist, removes expired holds, and checks active holds as well as bookings before inserting.
+- Replaced the placeholder integration contract with PostgreSQL tests for concurrent booking exclusion, expired-hold cleanup, idempotency-key uniqueness, and Tehran-local/UTC range overlap.
 - Attempted to add `.github/workflows/ci.yml` with a PostgreSQL service, migration application, lint, typecheck, tests, and build. GitHub rejected the commit because the connected token lacks repository `workflow` permission; no workflow file was created.
+
+## Verification
+
+Not run in this environment: dependency install, lint, typecheck, build, and PostgreSQL integration tests. The repository has no local database connection here, so those results remain unverified until CI or a developer environment runs them.
 
 ## Next
 
 1. Grant repository workflow permission and commit `.github/workflows/ci.yml`.
-2. Replace the integration contract scaffold with real PostgreSQL booking race, hold expiry, idempotent finalization, and Tehran-local overlap tests.
+2. Run the new PostgreSQL suite in CI and fix any environment-specific failures.
 3. Audit all private routes and UI failure/accessibility states, then finish remaining owner management surfaces.
 
 ## Release blockers
