@@ -2,10 +2,14 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
-import { db } from "@vercel/postgres";
+import { createClient } from "@vercel/postgres";
 
 const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "db", "migrations");
-const client = await db.connect();
+const connectionString = process.env.POSTGRES_URL_NON_POOLING ?? process.env.POSTGRES_URL;
+if (!connectionString) throw new Error("POSTGRES_URL or POSTGRES_URL_NON_POOLING is required");
+
+const client = createClient({ connectionString });
+await client.connect();
 try {
   await client.query(`CREATE TABLE IF NOT EXISTS schema_migrations (filename text PRIMARY KEY, checksum text NOT NULL, applied_at timestamptz NOT NULL DEFAULT now())`);
   const files = (await readdir(dir)).filter((f) => f.endsWith(".sql")).sort();
@@ -29,5 +33,5 @@ try {
     }
   }
 } finally {
-  client.release();
+  await client.end();
 }
