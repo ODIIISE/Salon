@@ -2,39 +2,32 @@
 
 Updated 2026-10-08.
 
-## Complete
+## Verified in repository
 
-- Single-salon-first scope accepted; schema remains tenancy-ready.
-- Product brief, architecture, roadmap, delivery plan, risk register, database runbook, Vercel deployment guide, launch runbook, release checklist, accessibility QA contract, and test strategy committed.
-- Persian RTL customer booking shell and protected owner timeline surface with dark-luxury visual direction and reduced-motion CSS policy.
-- Production security headers: no sniffing, strict referrer policy, frame denial, permissions policy, and HSTS.
-- Stable API error-code/message contract for customer recovery UI.
-- Environment contract rejects incomplete production configuration and mock SMS in production.
-- Pooled database boundary, no-store private response headers, readiness endpoint, Vercel cron configuration, protected notification worker route, and recovery error screen.
-- Migration verification script, release smoke command, and database-ready smoke check.
-- PostgreSQL schema with memberships, artists, services, add-ons, schedule, blocks, holds, bookings, events, audit logs, overlap exclusion, OTP/session, rate-limit, schedule settings, days off, notification jobs, booking idempotency, and payment policy/payment tables.
-- Auth schema, migration runner, hashed OTP/session primitives, FarazSMS provider boundary, OTP request/verify with phone/IP rate limits, session lookup, current-user, logout, and staff authorization.
-- OTP requests invalidate the challenge when FarazSMS delivery fails, so an undelivered code cannot remain usable.
-- FarazSMS adapter captures provider response IDs and uses pattern SMS for OTP plus simple SMS for transactional messages.
-- Protected notification worker sends pending SMS jobs through FarazSMS, persists provider message IDs, retries transient failures up to five attempts, and marks terminal failures visibly.
-- Server-side service-aware availability engine with owner-configured resolution, buffer, lead time, strict latest-finish/capped overflow, Tehran weekday/date filtering, days off, active booking exclusion, artist blocks, and corrected Tehran-local interval overlap comparison.
-- Authenticated service-aware five-minute hold endpoint with artist eligibility and any-artist resolution.
-- Booking finalize endpoint uses a transaction, database overlap constraint, idempotency key, booking event, and queued confirmation notification.
-- Tehran/Jalali conversion helpers and boundary tests.
-- Public catalog endpoint and customer UI wiring for live catalog, availability, OTP, hold, finalize, conflict, API failure, and confirmed receipt states.
-- Customer booking history, cancellation, rescheduling, and lifecycle SMS notifications.
-- Owner day timeline, protected status transitions, manual booking with explicit conflict override/audit, block controls, schedule settings, days off, formula-safe authorized CSV export, and payment/cancellation policy controls.
-- Public payment policy endpoint exposes only safe customer-facing fields.
-- PostgreSQL integration test contract scaffold, including a Tehran-local overlap regression.
-- Pure booking policy primitives and regression tests for duration, finish policy, intervals, and CSV formula safety.
+- Single-salon-first scope is accepted; schema remains tenancy-ready.
+- The application is implemented as a Next.js App Router modular monolith with PostgreSQL migrations, typed server boundaries, security headers, API recovery states, and a production build path.
+- Seven migrations exist in exact lexical order: `001_initial.sql` through `007_payments.sql`.
+- OTP/session auth, role authorization, service-aware Tehran/Jalali availability, five-minute holds, transactional booking finalization, PostgreSQL overlap protection, notification queueing, FarazSMS adapters, owner timeline operations, manual conflict overrides, payment policy, and formula-safe exports are present in code.
+- `vercel.json` already contains both cron schedules: notification processing and expired-hold cleanup, each route protected by `CRON_SECRET`.
+- The integration test scaffold exists and is skipped without `POSTGRES_URL`; it still needs real concurrent booking, expiry, idempotency, and Tehran-overlap assertions.
+
+## Slice 1 completed
+
+- Replaced the stale README with local setup, scripts, environment, architecture, migration, CI, deployment, and documentation links.
+- Standardized the documented FarazSMS variables to the names already used by runtime code: `SMS_API_KEY`, `SMS_LINE_NUMBER`, and `SMS_PATTERN_CODE`.
+- Added an explicit accepted FarazSMS decision and removed stale provider-choice ambiguity from the decision record.
+- Added `npm run verify-migrations` and included it in `npm run check`.
+- Hardened runtime validation for production database, session, cron, salon, SMS, and payment configuration.
+- Attempted to add `.github/workflows/ci.yml` with a PostgreSQL service, migration application, lint, typecheck, tests, and build. GitHub rejected the commit because the connected token lacks repository `workflow` permission; no workflow file was created.
 
 ## Next
 
-1. Run migrations and smoke checks against separate Vercel Preview/Production databases.
-2. Configure FarazSMS API key, sender line, and OTP pattern code; verify delivery and retry behavior.
-3. Complete production accessibility/device QA and connect remaining owner UI surfaces.
-4. Add a real payment gateway adapter only after the pay-at-salon/deposit policy is validated with the salon.
+1. Grant repository workflow permission and commit `.github/workflows/ci.yml`.
+2. Replace the integration contract scaffold with real PostgreSQL booking race, hold expiry, idempotent finalization, and Tehran-local overlap tests.
+3. Audit all private routes and UI failure/accessibility states, then finish remaining owner management surfaces.
 
 ## Release blockers
 
 The app is not public-launch ready until a real database is migrated, `CRON_SECRET` is configured, FarazSMS is real, integration/race tests pass against PostgreSQL, the notification worker is provider-wired, and no mock provider remains enabled in production.
+
+Owner-only actions remain: connect Vercel Preview and Production Postgres, set production secrets, verify real FarazSMS delivery, and run the first real Vercel deployment.
