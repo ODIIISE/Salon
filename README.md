@@ -54,7 +54,7 @@ Migrations are ordered SQL files under `db/migrations/`. The current repository 
 
 ## CI and deployment
 
-The repository has a CI workflow for lint, typecheck, tests, build, migration verification, and PostgreSQL-backed integration setup. If GitHub refuses workflow creation, the repository token needs the `workflow` permission before `.github/workflows/ci.yml` can be committed.
+A CI workflow is prepared to run lint, typecheck, tests, build, migration verification, and PostgreSQL-backed integration setup, but GitHub rejected its commit because the connected token lacks repository `workflow` permission. Grant that permission and push `.github/workflows/ci.yml` before treating CI as active.
 
 For deployment, create separate Vercel Preview and Production PostgreSQL connections, configure the variables from `.env.example`, apply migrations, deploy Preview, run `npm run smoke` with `SMOKE_BASE_URL`, verify FarazSMS delivery, and only then promote. See the launch checklist and runbook for release evidence and rollback steps.
 
