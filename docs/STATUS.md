@@ -15,14 +15,15 @@ Updated 2026-10-08.
 - Booking finalize endpoint uses a transaction, database overlap constraint, booking event, and queued confirmation notification.
 - Tehran/Jalali conversion helpers and boundary tests.
 - Public catalog endpoint and customer UI wiring for live catalog, availability, OTP, hold, finalize, conflict, API failure, and confirmed receipt states.
-- Customer booking history and cancellation endpoint.
+- Customer booking history, cancellation, and rescheduling endpoint.
+- Owner day timeline and authenticated booking status transitions with booking events.
 - Notification processing boundary that fails visibly until a real provider is configured.
 - Pure booking policy primitives and regression tests for duration, finish policy, intervals, and CSV formula safety.
 
 ## Next
 
 1. Add integration tests against PostgreSQL for holds, expiry, authorization, and concurrent finalize.
-2. Add customer reschedule with the same policy engine and hold flow.
-3. Connect a real SMS provider and durable scheduled invocation for notification processing.
-4. Add owner timeline, status transitions, owner notifications, and deployment smoke checks.
-5. Replace fixed scheduling defaults with salon-configured resolution, buffer, breaks, days off, lead time, and overflow settings.
+2. Add real SMS provider adapter and durable scheduled invocation for notification processing.
+3. Add owner manual booking, blocks, schedule configuration, and authorized CSV export.
+4. Add production error boundary, offline/retry states, accessibility dialog/calendar/timeline QA, and deployment smoke checks.
+5. Add payment/deposit policy after the booking core is proven.
