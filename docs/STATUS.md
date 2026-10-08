@@ -1,29 +1,26 @@
-# Implementation status
+# Status
 
 Updated 2026-10-08.
 
 ## Complete
 
 - Single-salon-first scope accepted; schema remains tenancy-ready.
-- Product brief, architecture, roadmap, delivery plan, risk register, database runbook, and test strategy committed.
+- Product brief, architecture, roadmap, delivery plan, risk register, database runbook, Vercel deployment guide, and test strategy committed.
 - Persian RTL booking shell with dark-luxury visual direction and reduced-motion CSS policy.
-- Environment contract and server-only database boundary added.
-- Initial PostgreSQL schema added with memberships, artists, services, add-ons, schedule, blocks, holds, bookings, events, audit logs, and artist overlap exclusion constraint.
-- Auth migration added for OTP challenges and revocable sessions.
-- Migration runner added with ordered files, checksum tracking, and transactional application.
-- Hashed OTP/session token primitives and provider adapter boundary added.
-- OTP request and verification routes added with secure session cookie issuance.
-- Pure booking policy primitives and regression tests added for duration, finish policy, intervals, and CSV formula safety.
-- Health endpoint reports database readiness separately from application availability.
+- Environment contract, pooled database boundary, no-store private response headers, and readiness endpoint.
+- PostgreSQL schema with memberships, artists, services, add-ons, schedule, blocks, holds, bookings, events, audit logs, and artist overlap exclusion constraint.
+- Auth schema, migration runner, hashed OTP/session primitives, provider adapter, OTP request/verify, session lookup, current-user, logout, and staff authorization.
+- Server availability read boundary, authenticated five-minute hold endpoint, and booking finalize endpoint using a transaction and database overlap constraint.
+- Pure booking policy primitives and regression tests for duration, finish policy, intervals, and CSV formula safety.
 
-## Next implementation slice
+## Next
 
-1. Add request rate limits and OTP delivery audit events.
-2. Add authenticated session lookup, logout, and salon membership/role policy.
-3. Add server availability calculation, hold creation, and atomic booking finalization.
-4. Add integration tests against PostgreSQL, then connect the existing visual flow to the API.
-5. Revisit GitHub Actions once repository workflow permission is granted.
+1. Replace placeholder availability slot generation with full Tehran/Jalali service-aware scheduling, breaks, blocks, lead time, Friday, and explicit overflow policy.
+2. Add request/IP/phone rate limits and OTP audit events.
+3. Add integration tests against PostgreSQL for holds, expiry, authorization, and concurrent finalize.
+4. Connect the visual flow to API states: conflict, hold expiry, offline, retry, and confirmed receipt.
+5. Add notifications, cancellation/reschedule, owner timeline, and deployment smoke checks.
 
-## Known setup note
+## Vercel
 
-The GitHub connection still cannot create `.github/workflows` because the connected account lacks repository workflow permission. This does not block local quality commands or application implementation.
+Use Vercel Postgres/Neon pooled connection variables and separate Preview/Production databases. The deployment guide is in `docs/VERCEL-DEPLOYMENT.md`.
