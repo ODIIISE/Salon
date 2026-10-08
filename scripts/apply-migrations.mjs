@@ -2,34 +2,32 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
-import { sql } from "@vercel/postgres";
+import { db } from "@vercel/postgres";
 
-const root = path.dirname(fileURLToPath(import.meta.url));
-const migrationDir = path.join(root, "..", "db", "migrations");
-
-await sql`CREATE TABLE IF NOT EXISTS schema_migrations (
-  filename text PRIMARY KEY,
-  checksum text NOT NULL,
-  applied_at timestamptz NOT NULL DEFAULT now()
-)`;
-
-const files = (await readdir(migrationDir)).filter((file) => file.endsWith(".sql")).sort();
-for (const filename of files) {
-  const contents = await readFile(path.join(migrationDir, filename), "utf8");
-  const checksum = createHash("sha256").update(contents).digest("hex");
-  const existing = await sql`SELECT checksum FROM schema_migrations WHERE filename = ${filename}`;
-  if (existing.rows.length) {
-    if (existing.rows[0].checksum !== checksum) throw new Error(`Migration checksum changed: ${filename}`);
-    continue;
+const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "db", "migrations");
+const client = await db.connect();
+try {
+  await client.query(`CREATE TABLE IF NOT EXISTS schema_migrations (filename text PRIMARY KEY, checksum text NOT NULL, applied_at timestamptz NOT NULL DEFAULT now())`);
+  const files = (await readdir(dir)).filter((f) => f.endsWith(".sql")).sort();
+  for (const filename of files) {
+    const contents = await readFile(path.join(dir, filename), "utf8");
+    const checksum = createHash("sha256").update(contents).digest("hex");
+    const existing = await client.query("SELECT checksum FROM schema_migrations WHERE filename = $1", [filename]);
+    if (existing.rows.length) {
+      if (existing.rows[0].checksum !== checksum) throw new Error(`Migration checksum changed: ${filename}. Never edit applied migrations; add a new one.`);
+      continue;
+    }
+    await client.query("BEGIN");
+    try {
+      await client.query(contents);
+      await client.query("INSERT INTO schema_migrations (filename, checksum) VALUES ($1, $2)", [filename, checksum]);
+      await client.query("COMMIT");
+      console.log(`Applied ${filename}`);
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    }
   }
-  await sql.query("BEGIN");
-  try {
-    await sql.query(contents);
-    await sql`INSERT INTO schema_migrations (filename, checksum) VALUES (${filename}, ${checksum})`;
-    await sql.query("COMMIT");
-    console.log(`Applied ${filename}`);
-  } catch (error) {
-    await sql.query("ROLLBACK");
-    throw error;
-  }
+} finally {
+  client.release();
 }
