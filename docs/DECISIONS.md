@@ -58,8 +58,16 @@ Status: proposed unless marked accepted. This file is the source of truth for ch
 
 **Accepted:** 2026-10-08 by Mehrdad Rastadfar.
 
-## Open decisions requiring owner input
+## ADR-010: FarazSMS only
 
-1. Deployment/database choice: Vercel + Neon/Postgres, or a different controlled host.
-2. SMS provider: Kavenegar, Ghasedak, or another provider with delivery-status support.
-3. Payment timing: pay-at-salon first, deposit in MVP, or deposit immediately after booking correctness.
+**Decision:** FarazSMS is the only SMS provider for launch. OTP uses the FarazSMS pattern endpoint; transactional messages use simple SMS. Iranian numbers are normalized to local `09...` format before delivery. Runtime configuration uses `SMS_PROVIDER`, `SMS_API_KEY`, `SMS_LINE_NUMBER`, and `SMS_PATTERN_CODE`.
+
+**Why:** one tested provider boundary is safer than carrying unverified provider branches into launch.
+
+**Accepted:** 2026-10-08 by Mehrdad Rastadfar.
+
+## ADR-011: pay at salon first
+
+**Decision:** `pay_at_salon` is the live payment mode. Deposit policy and idempotent payment contracts remain available, but no gateway is enabled until a provider, credentials, signature verification, refunds, and replay tests exist.
+
+**Accepted:** 2026-10-08 by Mehrdad Rastadfar.
