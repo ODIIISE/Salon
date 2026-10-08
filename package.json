@@ -9,8 +9,9 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "verify-migrations": "node scripts/verify-migrations.mjs",
     "smoke": "node scripts/smoke-check.mjs",
-    "check": "npm run typecheck && npm run test && npm run build"
+    "check": "npm run verify-migrations && npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {
     "@vercel/postgres": "^0.10.0",
