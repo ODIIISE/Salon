@@ -43,9 +43,8 @@ describe.skipIf(!databaseUrl)("booking PostgreSQL integration", () => {
     const expired = await sql`DELETE FROM booking_holds WHERE salon_id = ${salonId} AND expires_at <= now() RETURNING id`;
     expect(expired.rows).toHaveLength(1);
 
-    const bookingId = randomUUID();
-    await sql`INSERT INTO booking_requests (idempotency_key, salon_id, customer_id, booking_id) VALUES (${key}, ${salonId}, ${customerId}, ${bookingId})`;
-    await expect(sql`INSERT INTO booking_requests (idempotency_key, salon_id, customer_id, booking_id) VALUES (${key}, ${salonId}, ${customerId}, ${bookingId})`).rejects.toThrow();
+    await sql`INSERT INTO booking_requests (idempotency_key, salon_id, customer_id, booking_id) VALUES (${key}, ${salonId}, ${customerId}, NULL)`;
+    await expect(sql`INSERT INTO booking_requests (idempotency_key, salon_id, customer_id, booking_id) VALUES (${key}, ${salonId}, ${customerId}, NULL)`).rejects.toThrow();
 
     await sql`DELETE FROM salons WHERE id = ${salonId}`;
   });
