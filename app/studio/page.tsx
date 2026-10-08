@@ -4,18 +4,12 @@ import { useEffect, useState } from "react";
 
 type Booking = { id: string; starts_at: string; ends_at: string; status: string; service_name_snapshot: string; customer_name: string | null; artist_name: string };
 const salonId = process.env.NEXT_PUBLIC_SALON_ID ?? "";
+const labels: Record<string, string> = { reserved: "رزرو شده", confirmed: "تأیید شده", checked_in: "حاضر شده", completed: "انجام شد", cancelled: "لغو شده", no_show: "عدم حضور" };
 
 export default function StudioPage() {
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [message, setMessage] = useState("برای مشاهده برنامه امروز، سالن را پیکربندی کنید.");
-  useEffect(() => {
-    if (!salonId) return;
-    const date = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tehran" }).format(new Date());
-    fetch(`/api/owner/day?salonId=${encodeURIComponent(salonId)}&date=${date}`, { cache: "no-store" }).then(async (response) => {
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.code);
-      setBookings(data.bookings ?? []);
-    }).catch(() => setMessage("ورود استودیو یا اتصال برنامه امروز در دسترس نیست."));
-  }, []);
-  return <main className="studio-shell" dir="rtl"><header className="studio-header"><div><p className="eyebrow">FOREHAND / STUDIO</p><h1>برنامه امروز</h1></div><span className="status-chip"><i /> تهران · زنده</span></header><section className="studio-summary"><strong>{bookings.length.toLocaleString("fa-IR")}</strong><span>رزرو امروز</span></section>{bookings.length ? <section className="timeline" aria-label="برنامه رزروها">{bookings.map((booking) => <article className="timeline-card" key={booking.id}><time>{new Date(booking.starts_at).toLocaleTimeString("fa-IR", { timeZone: "Asia/Tehran", hour: "2-digit", minute: "2-digit" })}</time><div><strong>{booking.service_name_snapshot}</strong><span>{booking.customer_name ?? "رزرو دستی"} · {booking.artist_name}</span></div><b>{booking.status === "confirmed" ? "تأیید شده" : booking.status === "reserved" ? "رزرو شده" : booking.status}</b></article>)}</section> : <section className="studio-empty" role="status"><h2>{message}</h2><p>اطلاعات خصوصی فقط بعد از احراز هویت از سرور خوانده می‌شود.</p></section>}<a className="owner-link" href="/">بازگشت به رزرو مشتری</a></main>;
+  const [bookings, setBookings] = useState<Booking[]>([]); const [message, setMessage] = useState("برای مشاهده برنامه امروز، سالن را پیکربندی کنید."); const [busyId, setBusyId] = useState<string | null>(null);
+  const load = () => { if (!salonId) return; const date = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tehran" }).format(new Date()); fetch(`/api/owner/day?salonId=${encodeURIComponent(salonId)}&date=${date}`, { cache: "no-store" }).then(async r => { const d = await r.json(); if (!r.ok) throw new Error(d.code); setBookings(d.bookings ?? []); }).catch(() => setMessage("ورود استودیو یا اتصال برنامه امروز در دسترس نیست.")); };
+  useEffect(load, []);
+  async function changeStatus(id: string, status: string) { setBusyId(id); try { const r = await fetch(`/api/owner/bookings/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ salonId, status }) }); if (!r.ok) throw new Error(); await new Promise(resolve => setTimeout(resolve, 0)); load(); } catch { setMessage("تغییر وضعیت انجام نشد؛ دوباره تلاش کنید."); } finally { setBusyId(null); } }
+  return <main className="studio-shell" dir="rtl"><header className="studio-header"><div><p className="eyebrow">FOREHAND / STUDIO</p><h1>برنامه امروز</h1></div><span className="status-chip"><i /> تهران · زنده</span></header><section className="studio-summary"><strong>{bookings.length.toLocaleString("fa-IR")}</strong><span>رزرو امروز</span></section>{bookings.length ? <section className="timeline" aria-label="برنامه رزروها">{bookings.map((booking) => <article className="timeline-card" key={booking.id}><time>{new Date(booking.starts_at).toLocaleTimeString("fa-IR", { timeZone: "Asia/Tehran", hour: "2-digit", minute: "2-digit" })}</time><div><strong>{booking.service_name_snapshot}</strong><span>{booking.customer_name ?? "رزرو دستی"} · {booking.artist_name}</span></div><div className="timeline-actions"><b>{labels[booking.status] ?? booking.status}</b>{booking.status === "reserved" && <button disabled={busyId===booking.id} onClick={() => changeStatus(booking.id, "confirmed")}>تأیید</button>}{booking.status === "confirmed" && <button disabled={busyId===booking.id} onClick={() => changeStatus(booking.id, "checked_in")}>حضور</button>}{booking.status === "checked_in" && <button disabled={busyId===booking.id} onClick={() => changeStatus(booking.id, "completed")}>انجام شد</button>}</div></article>)}</section> : <section className="studio-empty" role="status"><h2>{message}</h2><p>اطلاعات خصوصی فقط بعد از احراز هویت از سرور خوانده می‌شود.</p></section>}<a className="owner-link" href="/">بازگشت به رزرو مشتری</a></main>;
 }
