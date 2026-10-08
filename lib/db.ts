@@ -12,3 +12,7 @@ export async function databaseReady() {
     return false;
   }
 }
+
+export function noStoreHeaders() {
+  return { "Cache-Control": "private, no-store, max-age=0" };
+}
